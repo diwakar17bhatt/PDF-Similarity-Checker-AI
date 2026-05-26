@@ -8,17 +8,16 @@ from modules.similarity import calculate_similarity
 
 app = Flask(__name__)
 
-# Configuration
+
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"pdf"}
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# Create upload folder if not exists
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# Check file extension
 def allowed_file(filename):
     return (
         "." in filename
@@ -26,7 +25,6 @@ def allowed_file(filename):
     )
 
 
-# Home Page
 @app.route("/")
 def home():
     return render_template(
@@ -36,13 +34,11 @@ def home():
     )
 
 
-# Compare PDFs
 @app.route("/compare", methods=["POST"])
 def compare():
 
     try:
 
-        # Check uploads
         if "pdf1" not in request.files or "pdf2" not in request.files:
             return render_template(
                 "index.html",
@@ -70,7 +66,6 @@ def compare():
                 error="Only PDF files are allowed."
             )
 
-        # Secure filenames
         filename1 = secure_filename(pdf1.filename)
         filename2 = secure_filename(pdf2.filename)
 
@@ -84,15 +79,12 @@ def compare():
             filename2
         )
 
-        # Save files
         pdf1.save(path1)
         pdf2.save(path2)
 
-        # Extract text
         text1 = extract_pdf_text(path1)
         text2 = extract_pdf_text(path2)
 
-        # Check extraction
         if not text1.strip():
             return render_template(
                 "index.html",
@@ -107,11 +99,9 @@ def compare():
                 error=f"No readable text found in {filename2}"
             )
 
-        # NLP preprocessing
         clean_text1 = clean_text(text1)
         clean_text2 = clean_text(text2)
 
-        # Similarity
         similarity = calculate_similarity(
             clean_text1,
             clean_text2
